@@ -5,8 +5,8 @@ struct Fonts {
     var buttonFont: UIFont
 
     init() {
-        self.titleFont = Fonts.generateFont(fontName: "PressStart2P-Regular", fontSize: width / 10)  // This works because we're calling a static method
-        self.buttonFont = Fonts.generateFont(fontName: "Doto-VariableFont_ROND,wght", fontSize: width / 20)
+        self.titleFont = Fonts.generateFont(fontName: "PressStart2P-Regular", fontSize: height / 10)  // This works because we're calling a static method
+        self.buttonFont = Fonts.generateFont(fontName: "Doto-VariableFont_ROND,wght", fontSize: height / 20)
     }
        
    // Static method for generating the font

@@ -7,8 +7,14 @@
 
 import UIKit
 
-let height = max(UIScreen.main.bounds.width, UIScreen.main.bounds.height)
-let width = min(UIScreen.main.bounds.width, UIScreen.main.bounds.height)
+let width = max(UIScreen.main.bounds.width, UIScreen.main.bounds.height)
+let height = min(UIScreen.main.bounds.width, UIScreen.main.bounds.height)
+
+var playerFloorLayout : [CGFloat : CGFloat] = [:]
+var monsterFloorLayout : [CGFloat : CGFloat] = [:]
+let monsterXPOS = width / 5
+let mainXPOS = width / 2.5
+
 var round = 1
 
 @main

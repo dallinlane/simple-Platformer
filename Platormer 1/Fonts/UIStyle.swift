@@ -11,7 +11,7 @@ struct UIStyle {
         
         NSLayoutConstraint.activate([
             label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            label.topAnchor.constraint(equalTo: view.topAnchor, constant: width/5)
+            label.topAnchor.constraint(equalTo: view.topAnchor, constant: height/5)
         ])
         
         label.sizeToFit() 
