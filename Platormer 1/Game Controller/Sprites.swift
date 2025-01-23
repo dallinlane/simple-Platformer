@@ -6,7 +6,6 @@ struct Sprites{
     var playerSprite: SKSpriteNode?  // Variable to store the player sprite
     var monsterSprite: SKSpriteNode?
     
-    
     init(scene: SKScene) {
         self.scene = scene
     }
@@ -35,23 +34,64 @@ struct Sprites{
         
         
         let walkAction = SKAction.animate(with: walkFrames, timePerFrame: 0.14)
-        sprite.run(SKAction.repeatForever(walkAction))
+        sprite.run(SKAction.repeatForever(walkAction), withKey: "walkingAnimation")
         
     }
     
     func spriteAdjustment(){
+        print(monsterFloorLayout)
         for (key, value) in playerFloorLayout {
             Timer.scheduledTimer(withTimeInterval: key, repeats: false) { timer in
-                self.playerSprite?.position.y = value - 41
+                self.playerSprite?.position.y = value - 35
             }
         }
         
         for (key, value) in monsterFloorLayout {
             Timer.scheduledTimer(withTimeInterval: key, repeats: false) { timer in
-                self.monsterSprite?.position.y = value - 11
+                self.monsterSprite?.position.y = value - 5
             }
         }
     }
+    
+    func moveSprites() {
+        
+        var distance = width * 0.85
+        
+        for sprite in [playerSprite, monsterSprite]{
+            
+            guard let sprite = sprite else { continue }
+
+            let moveRight = SKAction.moveBy(x: 50, y: 0, duration: 1.6)
+            
+            let count = Int(( distance - sprite.position.x) / 50)
+            
+            let sequence = SKAction.sequence([moveRight])
+            
+            let completionAction = SKAction.run {
+                
+                if sprite == playerSprite {
+                    playerSprite!.removeAction(forKey: "walkingAnimation")
+                    playerSprite?.texture = SKTexture(imageNamed: "player1")
+                } else {
+                    monsterSprite?.removeAction(forKey: "walkingAnimation")
+                    monsterSprite?.texture = SKTexture(imageNamed: "monster3")
+                }
+
+            }
+            
+            let fullAction = SKAction.sequence([SKAction.repeat(sequence, count: count), completionAction])
+            
+            sprite.run(fullAction, withKey: "moveAction")
+            
+            distance = width * 0.5
+        }
+
+        
+    }
+
+    
+    
+
     
 
 }

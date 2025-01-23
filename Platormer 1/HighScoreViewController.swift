@@ -1,10 +1,3 @@
-//
-//  HighScoreViewController.swift
-//  Platormer 1
-//
-//  Created by Dallin Lane on 04/12/2024.
-//
-
 import UIKit
 
 class HighScoreViewController: UIViewController {

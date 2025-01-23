@@ -1,10 +1,3 @@
-//
-//  Platormer_1UITests.swift
-//  Platormer 1UITests
-//
-//  Created by Dallin Lane on 04/12/2024.
-//
-
 import XCTest
 
 final class Platormer_1UITests: XCTestCase {

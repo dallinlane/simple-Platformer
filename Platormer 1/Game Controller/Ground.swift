@@ -6,11 +6,20 @@ struct Ground {
     var skView: SKView!
     var numberOfRectangles = 0
     var floorHeight = height / 2.5
-    let movementSpeed = 1.6
+    let movementDuration = 0.5 // 1.6
+    
+    var spriteGenerator : Sprites
+
+ 
     
     init(scene: SKScene, skView: SKView) {
         self.scene = scene
         self.skView = skView
+        
+        spriteGenerator = Sprites(scene: scene)
+        
+        spriteGenerator.addSprite(name: "player", count: 6, y: 120, scale: 0.5)
+        spriteGenerator.addSprite(name: "monster", count: 10, y: 150, scale: 1)
     }
 
 
@@ -41,9 +50,9 @@ struct Ground {
                         }
                     }
                     let distance = CGFloat(50 * i)
-                    let speedPerSecond =  CGFloat(50 / movementSpeed)
+                    let speedPerSecond =  CGFloat(50 / movementDuration)
                     playerFloorLayout[(distance - mainXPOS) / speedPerSecond] = floorHeight
-                    monsterFloorLayout[(distance - monsterXPOS) / CGFloat(50 / movementSpeed)] = floorHeight
+                    monsterFloorLayout[(distance - monsterXPOS) / CGFloat(50 / movementDuration)] = floorHeight
 
                     createTile = false
                 }
@@ -53,6 +62,8 @@ struct Ground {
             
         }
   
+        spriteGenerator.spriteAdjustment()
+
     }
     
     func createRectangele(xPosition: Int, yPosition : CGFloat, recHeight : CGFloat, skView : SKView, scene : SKScene){
@@ -71,7 +82,7 @@ struct Ground {
     
     
     func moveRectangle(_ node: SKShapeNode, skView: SKView, recHeight: CGFloat) {
-        let moveLeft = SKAction.moveBy(x: -50, y: 0, duration: movementSpeed)
+        let moveLeft = SKAction.moveBy(x: -50, y: 0, duration: movementDuration)
         var moveCount = 0
           let moveAction = SKAction.run {
               moveCount += 1
@@ -81,7 +92,11 @@ struct Ground {
         let sequence = SKAction.sequence([moveLeft, moveAction])
         let count = numberOfRectangles - Int(width) / 50 - 1
 
-        node.run(SKAction.repeat(sequence, count: count), withKey: "moveAction")
+        let completionAction = SKAction.run {
+            spriteGenerator.moveSprites()
+            }
+        
+            node.run(SKAction.sequence([SKAction.repeat(sequence, count: count), completionAction]), withKey: "moveAction")
     }
     
     

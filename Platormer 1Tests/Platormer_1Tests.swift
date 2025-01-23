@@ -1,10 +1,3 @@
-//
-//  Platormer_1Tests.swift
-//  Platormer 1Tests
-//
-//  Created by Dallin Lane on 04/12/2024.
-//
-
 import Testing
 @testable import Platormer_1
 

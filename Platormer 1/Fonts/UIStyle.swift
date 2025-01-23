@@ -1,6 +1,5 @@
 import UIKit
 
-
 struct UIStyle {
     
     
@@ -8,6 +7,7 @@ struct UIStyle {
         label.translatesAutoresizingMaskIntoConstraints = false
 
         label.font = Fonts().titleFont
+        label.textColor = UIColor.black
         
         NSLayoutConstraint.activate([
             label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
