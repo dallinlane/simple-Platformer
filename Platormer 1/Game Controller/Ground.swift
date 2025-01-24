@@ -31,15 +31,16 @@ struct Ground {
         for i in 0..<numberOfRectangles {
             var currentFloor = floorHeight
             
-            if i % 5 == 0 && i > 10 && i < numberOfRectangles - 20{
+            if i % 5 == 0 && i > 10{
                 createTile = true
             }
             
-            if createTile {
+            if createTile && i < numberOfRectangles - 12 {
                 if Bool.random() || i + 2 % 5 == 0 {
                     
-                    createRectangele(xPosition: i, yPosition: height / 3, recHeight: 50, skView: skView, scene: scene)
-                    if floorHeight >= height / 1.6 {
+                    createRectangele(xPosition: i, yPosition: height - 60, recHeight: 50, skView: skView, scene: scene)
+                    
+                    if floorHeight >= height / 1.6  {
                         floorHeight -= 50
                         currentFloor -= 100
                     } else {
@@ -58,7 +59,7 @@ struct Ground {
                 }
             }
                        
-            createRectangele(xPosition: i, yPosition: -height / 1.5, recHeight: currentFloor, skView: skView, scene : scene)
+            createRectangele(xPosition: i, yPosition: height / -5.778, recHeight: currentFloor, skView: skView, scene : scene)
             
         }
   
@@ -67,21 +68,18 @@ struct Ground {
     }
     
     func createRectangele(xPosition: Int, yPosition : CGFloat, recHeight : CGFloat, skView : SKView, scene : SKScene){
-        let rectangle = CGRect(x: CGFloat(xPosition * 50), y: yPosition, width: 50, height: recHeight)
-        let rectangleNode = SKShapeNode(rect: rectangle)
+        let sprite = SKSpriteNode(color: .brown, size: CGSize(width: 50, height: recHeight))
         
-        rectangleNode.fillColor = .brown
-        rectangleNode.lineWidth = 0
-        
-        rectangleNode.position = CGPoint(x: 0, y: skView.frame.midY)
-        
-        scene.addChild(rectangleNode)
-        moveRectangle(rectangleNode, skView: skView, recHeight: recHeight)
+        sprite.anchorPoint = CGPoint(x: 0.5, y: 0)
 
+        sprite.position = CGPoint(x: CGFloat(xPosition * 50), y: yPosition)
+
+        sprite.name = "tile" // Assign a name to identify tile sprites
+        scene.addChild(sprite)
+        moveSprite(sprite, skView: skView, recHeight: recHeight)
     }
     
-    
-    func moveRectangle(_ node: SKShapeNode, skView: SKView, recHeight: CGFloat) {
+    func moveSprite(_ node: SKSpriteNode, skView: SKView, recHeight: CGFloat) {
         let moveLeft = SKAction.moveBy(x: -50, y: 0, duration: movementDuration)
         var moveCount = 0
           let moveAction = SKAction.run {
@@ -98,6 +96,7 @@ struct Ground {
         
             node.run(SKAction.sequence([SKAction.repeat(sequence, count: count), completionAction]), withKey: "moveAction")
     }
+
     
     
 }

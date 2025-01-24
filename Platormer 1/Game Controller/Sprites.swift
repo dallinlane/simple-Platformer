@@ -10,7 +10,6 @@ struct Sprites{
         self.scene = scene
     }
     
-    
     mutating func addSprite(name: String, count: Int, y: CGFloat, scale : CGFloat) {
         let sprite = SKSpriteNode(imageNamed : "1")
         
@@ -39,16 +38,15 @@ struct Sprites{
     }
     
     func spriteAdjustment(){
-        print(monsterFloorLayout)
         for (key, value) in playerFloorLayout {
             Timer.scheduledTimer(withTimeInterval: key, repeats: false) { timer in
-                self.playerSprite?.position.y = value - 35
+                self.playerSprite?.position.y = value - 37
             }
         }
         
         for (key, value) in monsterFloorLayout {
             Timer.scheduledTimer(withTimeInterval: key, repeats: false) { timer in
-                self.monsterSprite?.position.y = value - 5
+                self.monsterSprite?.position.y = value - 7
             }
         }
     }
@@ -68,15 +66,7 @@ struct Sprites{
             let sequence = SKAction.sequence([moveRight])
             
             let completionAction = SKAction.run {
-                
-                if sprite == playerSprite {
-                    playerSprite!.removeAction(forKey: "walkingAnimation")
-                    playerSprite?.texture = SKTexture(imageNamed: "player1")
-                } else {
-                    monsterSprite?.removeAction(forKey: "walkingAnimation")
-                    monsterSprite?.texture = SKTexture(imageNamed: "monster3")
-                }
-
+                stopSprite(sprite)
             }
             
             let fullAction = SKAction.sequence([SKAction.repeat(sequence, count: count), completionAction])
@@ -84,9 +74,20 @@ struct Sprites{
             sprite.run(fullAction, withKey: "moveAction")
             
             distance = width * 0.5
+            
         }
 
         
+    }
+    
+    func stopSprite (_ sprite : SKSpriteNode)  {
+        if sprite == playerSprite {
+            playerSprite?.removeAction(forKey: "walkingAnimation")
+            playerSprite?.texture = SKTexture(imageNamed: "player1")
+        } else {
+            monsterSprite?.removeAction(forKey: "walkingAnimation")
+            monsterSprite?.texture = SKTexture(imageNamed: "monster3")
+        }
     }
 
     
