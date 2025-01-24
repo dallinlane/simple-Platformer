@@ -1,7 +1,7 @@
 import UIKit
 import SpriteKit
 
-struct Ground {
+class Ground {
     var scene : SKScene!
     var skView: SKView!
     var numberOfRectangles = 0
@@ -20,10 +20,11 @@ struct Ground {
         
         spriteGenerator.addSprite(name: "player", count: 6, y: 113, scale: 0.5)
         spriteGenerator.addSprite(name: "monster", count: 10, y: 142, scale: 1)
+        
     }
 
 
-    mutating func createGround() {
+    func createGround() {
         var createTile = false
     
         numberOfRectangles = Int(width * 2 / 50) + round * 5
@@ -84,7 +85,6 @@ struct Ground {
             var anchorpoint = CGPoint(x: 0.5, y: 0.5)
             
             if name == "ground"{
-                
                 sprite.texture = SKTexture(imageNamed: "ground" + String(Int.random(in: 2...15)))
                 anchorpoint = CGPoint(x: 0.5, y: 0)
             }
@@ -106,12 +106,14 @@ struct Ground {
             let brickYPosition = yPosition + (CGFloat(i) * brickHeight)
             sprite.position = CGPoint(x: CGFloat(xPosition * 50), y: brickYPosition)
             
-            
-
             sprite.name = name
 
             scene.addChild(sprite)
             moveSprite(sprite, skView: skView, recHeight: recHeight)
+            
+            if name != "ground" {
+                addGestureRecognizers(to: sprite, skView: skView)
+            }
         }
             
     }
@@ -129,13 +131,41 @@ struct Ground {
         let count = numberOfRectangles - Int(width) / 50 - 1
 
         let completionAction = SKAction.run {
-            spriteGenerator.moveSprites()
+            self.spriteGenerator.moveSprites()
             }
         
             node.run(SKAction.sequence([SKAction.repeat(sequence, count: count), completionAction]), withKey: "moveAction")
     }
 
-    
-    
+    func addGestureRecognizers(to sprite: SKSpriteNode, skView: SKView) {
+        // Attach a unique gesture recognizer to this sprite
+        let swipeLeft = UISwipeGestureRecognizer(target: self, action: #selector(handleTileSwipe(_:)))
+        swipeLeft.direction = .left
+        skView.addGestureRecognizer(swipeLeft)
+
+        let swipeRight = UISwipeGestureRecognizer(target: self, action: #selector(handleTileSwipe(_:)))
+        swipeRight.direction = .right
+        skView.addGestureRecognizer(swipeRight)
+        
+
+    }
+
+    @objc func handleTileSwipe(_ gesture: UISwipeGestureRecognizer) {
+        guard let skView = gesture.view as? SKView else { return }
+        let location = gesture.location(in: skView)
+
+        // Convert the location to the scene's coordinate space
+        let sceneLocation = scene.convertPoint(fromView: location)
+
+        // Identify the tile at the swipe location
+        if let tile = scene.nodes(at: sceneLocation).first as? SKSpriteNode {
+            let rotationAngle: CGFloat = .pi / 2
+            let rotationAction = gesture.direction == .left
+                ? SKAction.rotate(byAngle: -rotationAngle, duration: 0.2)
+                : SKAction.rotate(byAngle: rotationAngle, duration: 0.2)
+
+            tile.run(rotationAction)
+        }
+    }
 }
 
