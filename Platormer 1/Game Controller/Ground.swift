@@ -38,18 +38,24 @@ struct Ground {
             if createTile && i < numberOfRectangles - 12 {
                 if Bool.random() || i + 2 % 5 == 0 {
                     
-                    createSprite(xPosition: i, yPosition: height - 40, recHeight: 50, skView: skView, scene: scene, name: "tile")
-                    
+                    var name = "tile"
                     if floorHeight >= height / 1.6  {
                         floorHeight -= 50
                         currentFloor -= 100
                     } else {
                         if Bool.random() {
                             currentFloor -= 50
+                            name = "tile"
                         } else{
                             floorHeight += 50
+                            name = "tile1"
                         }
                     }
+                    
+                    
+                    createSprite(xPosition: i, yPosition: height - 40, recHeight: 50, skView: skView, scene: scene, name: name)
+
+                    
                     let distance = CGFloat(50 * i)
                     let speedPerSecond =  CGFloat(50 / movementDuration)
                     playerFloorLayout[(distance - mainXPOS) / speedPerSecond] = floorHeight
@@ -69,18 +75,21 @@ struct Ground {
     
     
     func createSprite(xPosition: Int, yPosition: CGFloat, recHeight: CGFloat, skView: SKView, scene: SKScene, name: String) {
-        
         let brickHeight: CGFloat = 50
         let numBricks = Int(recHeight / brickHeight)
   
         for i in 0..<numBricks {
             
             let sprite = SKSpriteNode()
+            var anchorpoint = CGPoint(x: 0.5, y: 0.5)
             
             if name == "ground"{
                 
                 sprite.texture = SKTexture(imageNamed: "ground" + String(Int.random(in: 2...15)))
-                sprite.anchorPoint = CGPoint(x: 0.5, y: 0)
+                anchorpoint = CGPoint(x: 0.5, y: 0)
+            }
+            else if name == "tile" {
+                sprite.texture = SKTexture(imageNamed: "ground1")
             }
             else {
                 sprite.texture = SKTexture(imageNamed: "stairs")
@@ -88,9 +97,10 @@ struct Ground {
                 if let rotation = rotations.randomElement(){
                     sprite.zRotation = .pi / rotation
                 }
-                sprite.anchorPoint = CGPoint(x: 0.5, y: 0.5)
-
             }
+            
+            sprite.anchorPoint = anchorpoint
+            
             sprite.size = CGSize(width: 50, height: brickHeight)
 
             let brickYPosition = yPosition + (CGFloat(i) * brickHeight)
