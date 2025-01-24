@@ -40,13 +40,13 @@ struct Sprites{
     func spriteAdjustment(){
         for (key, value) in playerFloorLayout {
             Timer.scheduledTimer(withTimeInterval: key, repeats: false) { timer in
-                self.playerSprite?.position.y = value - 37
+                self.playerSprite?.position.y = value - 44
             }
         }
         
         for (key, value) in monsterFloorLayout {
             Timer.scheduledTimer(withTimeInterval: key, repeats: false) { timer in
-                self.monsterSprite?.position.y = value - 7
+                self.monsterSprite?.position.y = value - 15
             }
         }
     }

@@ -18,8 +18,8 @@ struct Ground {
         
         spriteGenerator = Sprites(scene: scene)
         
-        spriteGenerator.addSprite(name: "player", count: 6, y: 120, scale: 0.5)
-        spriteGenerator.addSprite(name: "monster", count: 10, y: 150, scale: 1)
+        spriteGenerator.addSprite(name: "player", count: 6, y: 113, scale: 0.5)
+        spriteGenerator.addSprite(name: "monster", count: 10, y: 142, scale: 1)
     }
 
 
@@ -38,7 +38,7 @@ struct Ground {
             if createTile && i < numberOfRectangles - 12 {
                 if Bool.random() || i + 2 % 5 == 0 {
                     
-                    createRectangele(xPosition: i, yPosition: height - 60, recHeight: 50, skView: skView, scene: scene)
+                    createSprite(xPosition: i, yPosition: height - 40, recHeight: 50, skView: skView, scene: scene, name: "tile")
                     
                     if floorHeight >= height / 1.6  {
                         floorHeight -= 50
@@ -59,7 +59,7 @@ struct Ground {
                 }
             }
                        
-            createRectangele(xPosition: i, yPosition: height / -5.778, recHeight: currentFloor, skView: skView, scene : scene)
+            createSprite(xPosition: i, yPosition: height / -5.778, recHeight: currentFloor, skView: skView, scene : scene, name: "ground")
             
         }
   
@@ -67,18 +67,46 @@ struct Ground {
 
     }
     
-    func createRectangele(xPosition: Int, yPosition : CGFloat, recHeight : CGFloat, skView : SKView, scene : SKScene){
-        let sprite = SKSpriteNode(color: .brown, size: CGSize(width: 50, height: recHeight))
+    
+    func createSprite(xPosition: Int, yPosition: CGFloat, recHeight: CGFloat, skView: SKView, scene: SKScene, name: String) {
         
-        sprite.anchorPoint = CGPoint(x: 0.5, y: 0)
+        let brickHeight: CGFloat = 50
+        let numBricks = Int(recHeight / brickHeight)
+  
+        for i in 0..<numBricks {
+            
+            let sprite = SKSpriteNode()
+            
+            if name == "ground"{
+                
+                sprite.texture = SKTexture(imageNamed: "ground" + String(Int.random(in: 2...15)))
+                sprite.anchorPoint = CGPoint(x: 0.5, y: 0)
+            }
+            else {
+                sprite.texture = SKTexture(imageNamed: "stairs")
+                let rotations = [0.5, -2 , 1, 2]
+                if let rotation = rotations.randomElement(){
+                    sprite.zRotation = .pi / rotation
+                }
+                sprite.anchorPoint = CGPoint(x: 0.5, y: 0.5)
 
-        sprite.position = CGPoint(x: CGFloat(xPosition * 50), y: yPosition)
+            }
+            sprite.size = CGSize(width: 50, height: brickHeight)
 
-        sprite.name = "tile" // Assign a name to identify tile sprites
-        scene.addChild(sprite)
-        moveSprite(sprite, skView: skView, recHeight: recHeight)
+            let brickYPosition = yPosition + (CGFloat(i) * brickHeight)
+            sprite.position = CGPoint(x: CGFloat(xPosition * 50), y: brickYPosition)
+            
+            
+
+            sprite.name = name
+
+            scene.addChild(sprite)
+            moveSprite(sprite, skView: skView, recHeight: recHeight)
+        }
+            
     }
     
+
     func moveSprite(_ node: SKSpriteNode, skView: SKView, recHeight: CGFloat) {
         let moveLeft = SKAction.moveBy(x: -50, y: 0, duration: movementDuration)
         var moveCount = 0
