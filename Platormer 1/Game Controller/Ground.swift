@@ -1,12 +1,13 @@
 import UIKit
 import SpriteKit
 
-class Ground {
+class Ground{
     var scene : SKScene!
     var skView: SKView!
     var numberOfRectangles = 0
     var floorHeight = height / 2.5
-    let movementDuration = 0.5 // 1.6
+    let movementDuration = 1.6 // 1.6
+    var currentFloor = 0.0
     
     var spriteGenerator : Sprites
 
@@ -30,7 +31,7 @@ class Ground {
         numberOfRectangles = Int(width * 2 / 50) + round * 5
         
         for i in 0..<numberOfRectangles {
-            var currentFloor = floorHeight
+            currentFloor = floorHeight
             
             if i % 5 == 0 && i > 10{
                 createTile = true
@@ -54,7 +55,7 @@ class Ground {
                     }
                     
                     
-                    createSprite(xPosition: i, yPosition: height - 40, recHeight: 50, skView: skView, scene: scene, name: name)
+                    createSprite(xPosition: i, yPosition: height - 80, recHeight: 50, skView: skView, scene: scene, name: name)
 
                     
                     let distance = CGFloat(50 * i)
@@ -81,27 +82,26 @@ class Ground {
   
         for i in 0..<numBricks {
             
-            let sprite = SKSpriteNode()
             var anchorpoint = CGPoint(x: 0.5, y: 0.5)
+            var texture = SKTexture(imageNamed: "ground" + String(Int.random(in: 2...15)))
+            var rotation = 0.0
+            var spriteFloor = 0.0
+            var baseYPosition = currentFloor - 50
             
             if name == "ground"{
-                sprite.texture = SKTexture(imageNamed: "ground" + String(Int.random(in: 2...15)))
                 anchorpoint = CGPoint(x: 0.5, y: 0)
+                baseYPosition = 0.0
             }
             else if name == "tile" {
-                sprite.texture = SKTexture(imageNamed: "ground1")
+                texture = SKTexture(imageNamed: "ground1")
             }
             else {
-                sprite.texture = SKTexture(imageNamed: "stairs")
-                let rotations = [0.5, -2 , 1, 2]
-                if let rotation = rotations.randomElement(){
-                    sprite.zRotation = .pi / rotation
-                }
+                texture = SKTexture(imageNamed: "stairs")
+                rotation = (.pi / 2) * CGFloat(Int.random(in: 0...3))
             }
             
-            sprite.anchorPoint = anchorpoint
+            let sprite = CustomSprite(texture: texture, color: UIColor.clear, size: CGSize(width: 50, height: brickHeight), baseYPosition: baseYPosition, rotation: rotation, anchorpoint: anchorpoint)
             
-            sprite.size = CGSize(width: 50, height: brickHeight)
 
             let brickYPosition = yPosition + (CGFloat(i) * brickHeight)
             sprite.position = CGPoint(x: CGFloat(xPosition * 50), y: brickYPosition)
@@ -111,11 +111,9 @@ class Ground {
             scene.addChild(sprite)
             moveSprite(sprite, skView: skView, recHeight: recHeight)
             
-            if name != "ground" {
-                addGestureRecognizers(to: sprite, skView: skView)
-            }
+            addGestureRecognizers(to: sprite)
+
         }
-            
     }
     
 
@@ -137,35 +135,63 @@ class Ground {
             node.run(SKAction.sequence([SKAction.repeat(sequence, count: count), completionAction]), withKey: "moveAction")
     }
 
-    func addGestureRecognizers(to sprite: SKSpriteNode, skView: SKView) {
-        // Attach a unique gesture recognizer to this sprite
-        let swipeLeft = UISwipeGestureRecognizer(target: self, action: #selector(handleTileSwipe(_:)))
-        swipeLeft.direction = .left
-        skView.addGestureRecognizer(swipeLeft)
-
-        let swipeRight = UISwipeGestureRecognizer(target: self, action: #selector(handleTileSwipe(_:)))
-        swipeRight.direction = .right
-        skView.addGestureRecognizer(swipeRight)
-        
-
-    }
+    func addGestureRecognizers(to sprite: SKSpriteNode) {
+         let swipeLeft = UISwipeGestureRecognizer(target: self, action: #selector(handleTileSwipe(_:)))
+         swipeLeft.direction = .left
+         skView.addGestureRecognizer(swipeLeft)
+         
+         let swipeRight = UISwipeGestureRecognizer(target: self, action: #selector(handleTileSwipe(_:)))
+         swipeRight.direction = .right
+         skView.addGestureRecognizer(swipeRight)
+         
+         let swipeDown = UISwipeGestureRecognizer(target: self, action: #selector(handleTileSwipe(_:)))
+         swipeDown.direction = .down
+         skView.addGestureRecognizer(swipeDown)
+     }
 
     @objc func handleTileSwipe(_ gesture: UISwipeGestureRecognizer) {
         guard let skView = gesture.view as? SKView else { return }
         let location = gesture.location(in: skView)
-
-        // Convert the location to the scene's coordinate space
         let sceneLocation = scene.convertPoint(fromView: location)
-
-        // Identify the tile at the swipe location
-        if let tile = scene.nodes(at: sceneLocation).first as? SKSpriteNode {
+        
+        if let tile = scene.nodes(at: sceneLocation).first(where: { $0.name != "ground" }) as? CustomSprite {
             let rotationAngle: CGFloat = .pi / 2
-            let rotationAction = gesture.direction == .left
-                ? SKAction.rotate(byAngle: -rotationAngle, duration: 0.2)
-                : SKAction.rotate(byAngle: rotationAngle, duration: 0.2)
-
-            tile.run(rotationAction)
+            
+            switch gesture.direction {
+            case .left, .right:
+                if tile.name == "tile1" && !tile.swipeDown {
+                       let rotationAction = SKAction.rotate(byAngle: gesture.direction == .left ? -rotationAngle : rotationAngle, duration: 0.2)
+                       tile.run(rotationAction)
+                   }
+            case .down:
+                tile.run(SKAction.moveTo(y: tile.baseYPosition, duration: 0.2))
+                tile.swipeDown = true
+            default: break
+            }
         }
     }
+
+ }
+
+
+class CustomSprite: SKSpriteNode {
+    var baseYPosition: CGFloat
+    var swipeDown = false
+    
+    init(texture: SKTexture?, color: UIColor, size: CGSize, baseYPosition: CGFloat, rotation: CGFloat, anchorpoint: CGPoint ) {
+        self.baseYPosition = baseYPosition
+
+        super.init(texture: texture, color: color, size: size)
+        
+        self.position = CGPoint(x: self.position.x, y: baseYPosition)
+        self.zRotation = rotation
+        self.anchorPoint = anchorpoint
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
 }
+
 
