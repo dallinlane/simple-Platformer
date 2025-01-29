@@ -6,11 +6,11 @@ class Ground{
     var skView: SKView!
     var numberOfRectangles = 0
     var floorHeight = height / 2.5
-    let movementDuration = 1.0 // 1.6
+    let movementSpeed = 1.0 // 1.6
     var currentFloorHeight = 0.0
     var addFloorConnector = false
     var spriteGenerator : Sprites
-    
+    var floorStopped = false
     
     init(scene: SKScene, skView: SKView) {
         self.scene = scene
@@ -62,7 +62,7 @@ extension Ground {
     }
 
     func moveSprite(_ node: SKSpriteNode, skView: SKView, recHeight: CGFloat) {
-        let moveLeft = SKAction.moveBy(x: -50, y: 0, duration: movementDuration)
+        let moveLeft = SKAction.moveBy(x: -50, y: 0, duration: movementSpeed)
         var moveCount = 0
           let moveAction = SKAction.run {
               moveCount += 1
@@ -106,13 +106,13 @@ extension Ground {
                         }
                 
                 let distance = CGFloat(50 * index)
-                let speedPerSecond =  CGFloat(50 / movementDuration)
+                let speedPerSecond =  CGFloat(50 / movementSpeed)
                 
                 let distanceToPlayer = (distance - mainXPOS) / speedPerSecond
                 let distanceToMonster = (distance - monsterXPOS) / speedPerSecond
                 
     
-                Fill_In_Block_Sprite(xPosition: index, name: name, distanceToPlayer : distanceToPlayer , distanceToMonster: distanceToMonster)
+                Fill_In_Block_Sprite(xPosition: index, name: name, distanceToPlayer : distanceToPlayer - movementSpeed , distanceToMonster: distanceToMonster - movementSpeed)
     
                 addFloorConnector = false
                 
@@ -185,34 +185,48 @@ extension Ground {
 
 extension Ground {
     func spriteTimer(_ sprite: CustomSprite){
+        let duration = self.movementSpeed * 1.5
   
         Timer.scheduledTimer(withTimeInterval: sprite.distanceToPlayer, repeats: false) { timer in
-            let spriteGen = self.spriteGenerator
-            
-            if sprite.swipedDown && sprite.isUpright{
-                spriteGen.playerSprite?.position.y = sprite.floorHeight - 44
-            } else {
-                guard let playerSprite = spriteGen.playerSprite,
-                      let monsterSprite = spriteGen.monsterSprite else {
-                       return
-                   }
-                   
-                spriteGen.stopSprite(playerSprite)
-                spriteGen.stopSprite(monsterSprite)
+            if !self.floorStopped{
+                let spriteGen = self.spriteGenerator
                 
-                for node in self.scene.children {
-                    if let sprite = node as? SKSpriteNode {
-                        sprite.removeAction(forKey: "moveAction")
+                if sprite.swipedDown && sprite.isUpright{
+                    
+                    spriteGen.playerSprite?.run(spriteGen.climbingAnimation(speed: duration, asscent: sprite.floorHeight - 44))
+                    
+                } else {
+                    self.skView.gestureRecognizers?.forEach { self.skView.removeGestureRecognizer($0) }
+
+                    guard let playerSprite = spriteGen.playerSprite,
+                          let monsterSprite = spriteGen.monsterSprite else {
+                        return
+                    }
+                    spriteGen.playerSprite?.run(spriteGen.climbingAnimation(speed: duration, asscent: sprite.baseYPosition + 6))
+                    
+                    Timer.scheduledTimer(withTimeInterval: self.movementSpeed, repeats: false) { timer in
+                        
+                        spriteGen.stopSprite(playerSprite)
+                        spriteGen.moveToPlayer(movementSpeed: self.movementSpeed)
+                        
+                        for node in self.scene.children {
+                            if let sprite = node as? SKSpriteNode {
+                                sprite.removeAction(forKey: "moveAction")
+                            }
+                        }
+                        self.floorStopped = true
                     }
                 }
             }
         }
         
         Timer.scheduledTimer(withTimeInterval: sprite.distanceToMonster, repeats: false) { timer in
-            self.spriteGenerator.monsterSprite?.position.y = sprite.floorHeight - 15
+            if !self.floorStopped {
+                self.spriteGenerator.monsterSprite?.run(self.spriteGenerator.climbingAnimation(speed: duration, asscent: sprite.floorHeight - 15))
+            }
         }
     }
-
+    
 }
 
 //MARK: - Class for the Floor Connector Sprite

@@ -72,5 +72,31 @@ struct Sprites{
             monsterSprite?.texture = SKTexture(imageNamed: "monster3")
         }
     }
+    
+    func climbingAnimation(speed: CGFloat, asscent: CGFloat) -> SKAction {
+        let moveUp = SKAction.moveTo(y: asscent, duration: speed) // Move over 1 second
+            moveUp.timingMode = .easeInEaseOut // Smooth transition
+        
+        return moveUp
+    }
+    
+    func moveToPlayer (movementSpeed: CGFloat){
+        
+        guard let monsterSprite = monsterSprite else { return }
+
+        let distance = abs(mainXPOS - monsterSprite.position.x)
+        
+        let duration = (distance * movementSpeed) / 50
+        
+        let moveAction = SKAction.moveTo(x: mainXPOS - 60, duration: duration)
+        moveAction.timingMode = .easeOut
+        
+        let completionAction = SKAction.run {
+            stopSprite(monsterSprite)
+        }
+            
+        let sequence = SKAction.sequence([moveAction, completionAction])
+        monsterSprite.run(sequence)
+    }
 
 }
