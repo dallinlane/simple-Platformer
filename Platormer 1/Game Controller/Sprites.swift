@@ -18,7 +18,6 @@ struct Sprites{
             walkFrames.append(SKTexture(imageNamed: name + "\(i)"))
         }
         
-        
         sprite.position = CGPoint(x: name == "player" ? mainXPOS : monsterXPOS , y: y)
         scene.addChild(sprite)
         
@@ -30,7 +29,6 @@ struct Sprites{
         } else {
             monsterSprite = sprite
         }
-        
         
         let walkAction = SKAction.animate(with: walkFrames, timePerFrame: 0.14)
         sprite.run(SKAction.repeatForever(walkAction), withKey: "walkingAnimation")
@@ -74,10 +72,7 @@ struct Sprites{
             sprite.run(fullAction, withKey: "moveAction")
             
             distance = width * 0.5
-            
         }
-
-        
     }
     
     func stopSprite (_ sprite : SKSpriteNode)  {
@@ -89,10 +84,5 @@ struct Sprites{
             monsterSprite?.texture = SKTexture(imageNamed: "monster3")
         }
     }
-
-    
-    
-
-    
 
 }
