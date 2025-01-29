@@ -6,13 +6,12 @@ class Ground{
     var skView: SKView!
     var numberOfRectangles = 0
     var floorHeight = height / 2.5
-    let movementDuration = 1.6 // 1.6
+    let movementDuration = 1.0 // 1.6
     var currentFloorHeight = 0.0
     var addFloorConnector = false
-
-    
     var spriteGenerator : Sprites
-
+    
+    
     init(scene: SKScene, skView: SKView) {
         self.scene = scene
         self.skView = skView
@@ -21,9 +20,7 @@ class Ground{
         
         spriteGenerator.addSprite(name: "player", count: 6, y: 113, scale: 0.5)
         spriteGenerator.addSprite(name: "monster", count: 10, y: 142, scale: 1)
-        
     }
-
  }
 
 //MARK: - Creating The Ground
@@ -42,9 +39,6 @@ extension Ground {
             createSprite(xPosition: i, yPosition: height / -5.778, recHeight: currentFloorHeight, name: "ground")
             
         }
-  
-        spriteGenerator.spriteAdjustment()
-
     }
     
     func createSprite(xPosition: Int, yPosition: CGFloat, recHeight: CGFloat, name: String) {
@@ -110,21 +104,23 @@ extension Ground {
                                 name = "tile1"
                             }
                         }
-    
-                    Fill_In_Block_Sprite(xPosition: index, name: name)
-    
-                        let distance = CGFloat(50 * index)
-                        let speedPerSecond =  CGFloat(50 / movementDuration)
                 
-                        playerFloorLayout[(distance - mainXPOS) / speedPerSecond] = floorHeight
-                        monsterFloorLayout[(distance - monsterXPOS) / CGFloat(50 / movementDuration)] = floorHeight
+                let distance = CGFloat(50 * index)
+                let speedPerSecond =  CGFloat(50 / movementDuration)
+                
+                let distanceToPlayer = (distance - mainXPOS) / speedPerSecond
+                let distanceToMonster = (distance - monsterXPOS) / speedPerSecond
+                
     
-                        addFloorConnector = false
+                Fill_In_Block_Sprite(xPosition: index, name: name, distanceToPlayer : distanceToPlayer , distanceToMonster: distanceToMonster)
+    
+                addFloorConnector = false
+                
                     }
                 }
         }
 
-    func Fill_In_Block_Sprite(xPosition: Int, name: String) {
+    func Fill_In_Block_Sprite(xPosition: Int, name: String, distanceToPlayer : CGFloat, distanceToMonster: CGFloat ) {
     
         let texture = SKTexture(imageNamed: name == "tile" ? "ground1" : "stairs")
         let rotation = name == "tile" ? 0.0 : (.pi / 2) * CGFloat(Int.random(in: 0...3))
@@ -134,8 +130,14 @@ extension Ground {
         sprite.position = CGPoint(x: CGFloat(xPosition * 50), y: height - 79)
         
         sprite.name = name
+        
+        sprite.distanceToPlayer = distanceToPlayer
+        sprite.distanceToMonster = distanceToMonster
+        sprite.floorHeight = floorHeight
+        spriteTimer(sprite)
 
         scene.addChild(sprite)
+        
         moveSprite(sprite, skView: skView, recHeight: 50)
         
         addGestureRecognizers(to: sprite)
@@ -165,24 +167,66 @@ extension Ground {
             
             switch gesture.direction {
             case .left, .right:
-                if tile.name == "tile1" && !tile.swipeDown {
+                if tile.name == "tile1" && !tile.swipedDown {
                        let rotationAction = SKAction.rotate(byAngle: gesture.direction == .left ? -rotationAngle : rotationAngle, duration: 0.2)
                        tile.run(rotationAction)
                    }
             case .down:
                 tile.run(SKAction.moveTo(y: tile.baseYPosition, duration: 0.2))
-                tile.swipeDown = true
+                tile.swipedDown = true
             default: break
             }
         }
     }
+    
+}
+
+//MARK: - Adjusts the player & Bosses height and stops the game
+
+extension Ground {
+    func spriteTimer(_ sprite: CustomSprite){
+  
+        Timer.scheduledTimer(withTimeInterval: sprite.distanceToPlayer, repeats: false) { timer in
+            let spriteGen = self.spriteGenerator
+            
+            if sprite.swipedDown && sprite.isUpright{
+                spriteGen.playerSprite?.position.y = sprite.floorHeight - 44
+            } else {
+                guard let playerSprite = spriteGen.playerSprite,
+                      let monsterSprite = spriteGen.monsterSprite else {
+                       return
+                   }
+                   
+                spriteGen.stopSprite(playerSprite)
+                spriteGen.stopSprite(monsterSprite)
+                
+                for node in self.scene.children {
+                    if let sprite = node as? SKSpriteNode {
+                        sprite.removeAction(forKey: "moveAction")
+                    }
+                }
+            }
+        }
+        
+        Timer.scheduledTimer(withTimeInterval: sprite.distanceToMonster, repeats: false) { timer in
+            self.spriteGenerator.monsterSprite?.position.y = sprite.floorHeight - 15
+        }
+    }
+
 }
 
 //MARK: - Class for the Floor Connector Sprite
 
 class CustomSprite: SKSpriteNode {
     var baseYPosition: CGFloat
-    var swipeDown = false
+    var swipedDown = false
+    var distanceToPlayer = 0.0
+    var distanceToMonster = 0.0
+    var floorHeight = 0.0
+    
+    var isUpright : Bool {
+            return abs(abs(self.zRotation).truncatingRemainder(dividingBy: .pi * 2) - 0) < 0.0001
+    }
     
     init(texture: SKTexture?, color: UIColor, baseYPosition: CGFloat, rotation: CGFloat) {
         self.baseYPosition = baseYPosition
@@ -198,3 +242,5 @@ class CustomSprite: SKSpriteNode {
     }
     
 }
+
+

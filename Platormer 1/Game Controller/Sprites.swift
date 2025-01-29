@@ -5,6 +5,7 @@ struct Sprites{
     var scene : SKScene!
     var playerSprite: SKSpriteNode?  // Variable to store the player sprite
     var monsterSprite: SKSpriteNode?
+    var connectorList: [CustomSprite] = []
     
     init(scene: SKScene) {
         self.scene = scene
@@ -35,19 +36,6 @@ struct Sprites{
         
     }
     
-    func spriteAdjustment(){
-        for (key, value) in playerFloorLayout {
-            Timer.scheduledTimer(withTimeInterval: key, repeats: false) { timer in
-                self.playerSprite?.position.y = value - 44
-            }
-        }
-        
-        for (key, value) in monsterFloorLayout {
-            Timer.scheduledTimer(withTimeInterval: key, repeats: false) { timer in
-                self.monsterSprite?.position.y = value - 15
-            }
-        }
-    }
     
     func moveSprites() {
         

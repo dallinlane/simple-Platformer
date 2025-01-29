@@ -3,8 +3,6 @@ import UIKit
 let width = max(UIScreen.main.bounds.width, UIScreen.main.bounds.height)
 let height = min(UIScreen.main.bounds.width, UIScreen.main.bounds.height)
 
-var playerFloorLayout : [CGFloat : CGFloat] = [:]
-var monsterFloorLayout : [CGFloat : CGFloat] = [:]
 let monsterXPOS = width / 5
 let mainXPOS = width / 2.5
 
